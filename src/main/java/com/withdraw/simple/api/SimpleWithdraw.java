@@ -1,20 +1,23 @@
 package com.withdraw.simple.api;
 
+import java.awt.List;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.math.BigInteger;
+import java.util.ArrayList;
 
+import org.web3j.abi.datatypes.generated.Bytes32;
 import org.web3j.crypto.CipherException;
 import org.web3j.crypto.Credentials;
 import org.web3j.crypto.WalletUtils;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.web3j.protocol.http.HttpService;
+import org.web3j.tuples.generated.Tuple3;
 import org.web3j.tx.Contract;
 import org.web3j.tx.ManagedTransaction;
-
 
 public class SimpleWithdraw {
 
@@ -24,11 +27,11 @@ public class SimpleWithdraw {
 	static String password = "123456789";
 	// This is the address of thе contract when deployed
 	static String SimpleReservationSingleWithdrawerContractAddress = "0x504fb529fe3c899d609404f4ba0a6875e169a26a";
+	static String SimpleReservationCustomWithdrawerContractAddress = "0xac146Feb6c7812d2c6BF448e1AdF45cEC3C19163";
 	// This should be changed for different environments, can be used with a config
 	// file. This is the same as the ress-api
 	static Web3j web3 = Web3j.build(new HttpService("https://ropsten.infura.io/Up5uvBHSCSqtOmnlhL87"));
 	// static Web3j web3 = Web3j.build(new HttpService());
-
 
 	// Method for creating the creadentials for interacting with the contract
 	public static Credentials createCredentials() throws IOException, CipherException {
@@ -47,8 +50,9 @@ public class SimpleWithdraw {
 	// All of this functions can accept parameter for the address, not to be
 	// hardcoded in the transaction
 	public static TransactionReceipt setWithdrawer() throws IOException, CipherException, SmartContractException {
-		SimpleReservationSingleWithdrawer simpleReservationContractInstance = SimpleReservationSingleWithdrawer.load(SimpleReservationSingleWithdrawerContractAddress,
-				web3, createCredentials(), ManagedTransaction.GAS_PRICE, Contract.GAS_LIMIT);
+		SimpleReservationSingleWithdrawer simpleReservationContractInstance = SimpleReservationSingleWithdrawer.load(
+				SimpleReservationSingleWithdrawerContractAddress, web3, createCredentials(),
+				ManagedTransaction.GAS_PRICE, Contract.GAS_LIMIT);
 		TransactionReceipt setWithdrawer = null;
 		try {
 			setWithdrawer = simpleReservationContractInstance
@@ -63,8 +67,9 @@ public class SimpleWithdraw {
 	// whom the money should be withdrawn)
 	public static TransactionReceipt setWithdrawerDestinationAddress()
 			throws IOException, CipherException, SmartContractException {
-		SimpleReservationSingleWithdrawer simpleReservationContractInstance = SimpleReservationSingleWithdrawer.load(SimpleReservationSingleWithdrawerContractAddress,
-				web3, createCredentials(), ManagedTransaction.GAS_PRICE, Contract.GAS_LIMIT);
+		SimpleReservationSingleWithdrawer simpleReservationContractInstance = SimpleReservationSingleWithdrawer.load(
+				SimpleReservationSingleWithdrawerContractAddress, web3, createCredentials(),
+				ManagedTransaction.GAS_PRICE, Contract.GAS_LIMIT);
 		TransactionReceipt setWithdrawerDestinationAddress = null;
 		try {
 			setWithdrawerDestinationAddress = simpleReservationContractInstance
@@ -77,8 +82,9 @@ public class SimpleWithdraw {
 
 	// Getting the withdrawer address
 	public static String getWithdrawerAddress() throws SmartContractException, IOException, CipherException {
-		SimpleReservationSingleWithdrawer simpleReservationContractInstance = SimpleReservationSingleWithdrawer.load(SimpleReservationSingleWithdrawerContractAddress,
-				web3, createCredentials(), ManagedTransaction.GAS_PRICE, Contract.GAS_LIMIT);
+		SimpleReservationSingleWithdrawer simpleReservationContractInstance = SimpleReservationSingleWithdrawer.load(
+				SimpleReservationSingleWithdrawerContractAddress, web3, createCredentials(),
+				ManagedTransaction.GAS_PRICE, Contract.GAS_LIMIT);
 
 		String withdrawerAddress = null;
 
@@ -93,8 +99,9 @@ public class SimpleWithdraw {
 
 	// Getting the withdraw destination wallet address
 	public static String getWithdrawerDestinationAddress() throws SmartContractException, IOException, CipherException {
-		SimpleReservationSingleWithdrawer simpleReservationContractInstance = SimpleReservationSingleWithdrawer.load(SimpleReservationSingleWithdrawerContractAddress,
-				web3, createCredentials(), ManagedTransaction.GAS_PRICE, Contract.GAS_LIMIT);
+		SimpleReservationSingleWithdrawer simpleReservationContractInstance = SimpleReservationSingleWithdrawer.load(
+				SimpleReservationSingleWithdrawerContractAddress, web3, createCredentials(),
+				ManagedTransaction.GAS_PRICE, Contract.GAS_LIMIT);
 
 		String withdrawerDestinationAddress = null;
 
@@ -111,8 +118,9 @@ public class SimpleWithdraw {
 	// timestamp should be in seconds)
 	public static TransactionReceipt withdrawReservationsForGivenTimestamp(int timestampInSeconds)
 			throws IOException, CipherException, SmartContractException {
-		SimpleReservationSingleWithdrawer simpleReservationContractInstance = SimpleReservationSingleWithdrawer.load(SimpleReservationSingleWithdrawerContractAddress,
-				web3, createCredentials(), ManagedTransaction.GAS_PRICE, Contract.GAS_LIMIT);
+		SimpleReservationSingleWithdrawer simpleReservationContractInstance = SimpleReservationSingleWithdrawer.load(
+				SimpleReservationSingleWithdrawerContractAddress, web3, createCredentials(),
+				ManagedTransaction.GAS_PRICE, Contract.GAS_LIMIT);
 
 		int daysInSeconds = 86400;
 		long formattedTimestamp = timestampInSeconds / daysInSeconds;
@@ -130,11 +138,42 @@ public class SimpleWithdraw {
 		return withdrawResult;
 	}
 
+	public static TransactionReceipt withdrawFromCustomWithdrawerConctract(String[] reservationIds) throws IOException, CipherException, SmartContractException {
+		SimpleReservationMultipleWithdrawers reservationCustomWithdrawerContractInstance = SimpleReservationMultipleWithdrawers.load(SimpleReservationCustomWithdrawerContractAddress, web3, createCredentials(), ManagedTransaction.GAS_PRICE, Contract.GAS_LIMIT);
+			
+		TransactionReceipt withdrawResult;
+		ArrayList<byte[]> reservationIdsArray = new ArrayList<byte[]>();
+		
+		for (int i = 0; i < reservationIds.length; i++) {
+			Bytes32 reservationIdBytes = stringToBytes32(reservationIds[i]);
+			byte[] reservationIdByte = reservationIdBytes.getValue();
+			reservationIdsArray.add(reservationIdByte);
+		}
+		
+		try {
+			withdrawResult = reservationCustomWithdrawerContractInstance.withdraw(reservationIdsArray).send();
+			
+		} catch (Exception e) {
+			throw new SmartContractException("Withdraw failed");
+		}
+		System.out.println(withdrawResult);
+		return withdrawResult;
+	}
+	
+	public static Bytes32 stringToBytes32(String string) {
+        byte[] byteValue = string.getBytes();
+        byte[] byteValueLen32 = new byte[32];
+        System.arraycopy(byteValue, 0, byteValueLen32, 0, byteValue.length);
+        return new Bytes32(byteValueLen32);
+    }
+
 	public static void main(String[] args) throws Exception {
-		setWithdrawer();
-		setWithdrawerDestinationAddress();
-//		withdrawReservationsForGivenTimestamp(1530021600);
-		getWithdrawerAddress();
-		getWithdrawerDestinationAddress();
+//		setWithdrawer();
+//		setWithdrawerDestinationAddress();
+//		// withdrawReservationsForGivenTimestamp(1530021600);
+//		getWithdrawerAddress();
+//		getWithdrawerDestinationAddress();
+		String[] reservationIds = {"udri205","udri206"};
+		withdrawFromCustomWithdrawerConctract(reservationIds);
 	}
 }
