@@ -57,11 +57,8 @@ public class SimpleWithdraw {
 		return credentials;
 	}
 
-	public static String sendRawTransaction(String[] transactions)
+	public static boolean sendRawTransaction(String[] transactions)
 			throws InterruptedException, ExecutionException, IOException {
-
-	
-		// String transactionHexValue = transaction.for
 
 		for (int i = 0; i < transactions.length; i++) {
 			String currentTransaction = transactions[i];
@@ -72,19 +69,14 @@ public class SimpleWithdraw {
 
 			EthGetTransactionReceipt transactionReceipt = web3.ethGetTransactionReceipt(transactionHash).sendAsync()
 					.get();
-			System.out.println(transactionHash);
-			System.out.println(transactionReceipt);
-			System.out.println(transactionReceipt.getTransactionReceipt().isPresent());
 
-			 while (!transactionReceipt.getTransactionReceipt().isPresent()) {
-			 Thread.sleep(30000);
-			 transactionReceipt = web3.ethGetTransactionReceipt(transactionHash).sendAsync()
-						.get();
-			 }
-			
+			while (!transactionReceipt.getTransactionReceipt().isPresent()) {
+				Thread.sleep(30000);
+				transactionReceipt = web3.ethGetTransactionReceipt(transactionHash).sendAsync().get();
+			}
+
 		}
-		System.out.println("KYP");
-		return "KYP";
+		return true;
 	}
 
 	public static TransactionReceipt createSimpleReservation(int reservationCostWei, int timestampInSeconds)
@@ -96,7 +88,7 @@ public class SimpleWithdraw {
 				SimpleReservationSingleWithdrawerContractAddress, web3, createCredentials(),
 				ManagedTransaction.GAS_PRICE, Contract.GAS_LIMIT);
 
-		// Gas limi for approve can be set to 60000. This is the limit used in the
+		// Gas limit for approve can be set to 60000. This is the limit used in the
 		// frontend.
 		MintableToken locTokenContractInstance = MintableToken.load(LocTokenContractAddress, web3, createCredentials(),
 				ManagedTransaction.GAS_PRICE, Contract.GAS_LIMIT);
@@ -279,8 +271,8 @@ public class SimpleWithdraw {
 		// withdrawFromCustomWithdrawerConctract(reservationIds);
 		// createSimpleReservation(10, 1536523200);
 		String[] test = {
-				"0xf8ab8206638502cb41780082ea6094a8ef317aaafea769e4b6df9f43d070ccaaa31dfb80b844095ea7b3000000000000000000000000504fb529fe3c899d609404f4ba0a6875e169a26a000000000000000000000000000000000000000000000000000000ebb271ba792aa093f5b40be1cf624496ba0635912a2cc44d7116606439019d1a1d186a3c6af4c1a0232a04b177f894a9fa1a08df51796192c8fddab7e2db14d85f0a3c48757e2ffd",
-				"0xf8ac8206648502cb41780083014c0894504fb529fe3c899d609404f4ba0a6875e169a26a80b844bee9d69a000000000000000000000000000000000000000000000000000000ebb271ba7900000000000000000000000000000000000000000000000000000000000045dc29a0a998092d6b4a9211a17fae90fc1a9f40c754287f7aeecb1746cc598565d2ad1fa002ecb8b5162124411b67007c1e8eb3ca14cc2114974ff25c2687635b2db428c5" };
+				"0xf8ab8206678501e2cc310082ea6094a8ef317aaafea769e4b6df9f43d070ccaaa31dfb80b844095ea7b3000000000000000000000000cba43087e56867427a9df3da8b539727f693b320000000000000000000000000000000000000000000000001a055690d9db8000029a063c85adb0b5fe3aa9827c4708f94c5f2e47900853162f4893ae893c6cb21c9dea01082536838ac24e98b3c3cfc126f392b13e2a09a6010d8fc788ba3e0a0238f75",
+				"0xf8ec8206688501e2cc3100830249f094cba43087e56867427a9df3da8b539727f693b32080b884de2edd6a7465737453656e64310000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001a055690d9db80000000000000000000000000000000000000000000000000000000000005b8b27ff000000000000000000000000b63df2068d209f8ff3925c4c9dbbabfd313018252aa0b12d17ea59f6100604c4e53603173ec11532ec99a55591b342f23266ed2c0675a0118df264a6467506f28c594be8dd207e336f4c31fa42b2a1f4d19d629e7dd684" };
 		sendRawTransaction(test);
 	}
 }
